@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Guessing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Country Guessing Game</h1>
+    <label for="continent">Choose a continent:</label>
+    <select id="continent">
+        <option value="Africa">Africa</option>
+        <option value="Asia">Asia</option>
+        <option value="Europe">Europe</option>
+        <option value="North America">North America</option>
+        <option value="South America">South America</option>
+        <option value="Oceania">Oceania</option>
+    </select>
+    <button id="start">Start Game</button>
+
+    <div id="game" class="hidden">
+        <p>Guess the country: <span id="country-display"></span></p>
+        <input type="text" id="guess" placeholder="Enter a letter" maxlength="1">
+        <button id="submit-guess">Submit Guess</button>
+        <p id="message"></p>
+        <p id="chances"></p>
+    </div>
+
+    <script>
+        const continentsDict = {
+            "Africa": [
+                "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", 
+                "Cape Verde", "Cameroon", "Central African Republic", "Chad", "Comoros", 
+                "Congo", "Democratic Republic of the Congo", "Djibouti", "Egypt", 
+                "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", 
+                "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", 
+                "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", 
+                "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", 
+                "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", 
+                "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", 
+                "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"
+            ],
+            "Asia": [
+                "Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", 
+                "Brunei", "Cambodia", "China", "Cyprus", "Georgia", "India", "Indonesia", 
+                "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwait", 
+                "Kyrgyzstan", "Laos", "Lebanon", "Malaysia", "Maldives", "Mongolia", 
+                "Myanmar", "Nepal", "North Korea", "Oman", "Pakistan", "Palestine", 
+                "Philippines", "Qatar", "Saudi Arabia", "Singapore", "South Korea", 
+                "Sri Lanka", "Syria", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", 
+                "Turkey", "Turkmenistan", "United Arab Emirates", "Uzbekistan", "Vietnam", "Yemen"
+            ],
+            "Europe": [
+                "Albania", "Andorra", "Armenia", "Austria", "Azerbaijan", "Belarus", 
+                "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", 
+                "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Georgia", 
+                "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kazakhstan", 
+                "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", 
+                "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", 
+                "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", 
+                "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", 
+                "Ukraine", "United Kingdom", "Vatican City"
+            ],
+            "North America": [
+                "Antigua and Barbuda", "Bahamas", "Barbados", "Belize", "Canada", "Costa Rica", 
+                "Cuba", "Dominica", "Dominican Republic", "El Salvador", "Grenada", 
+                "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", 
+                "Panama", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", 
+                "Trinidad and Tobago", "United States"
+            ],
+            "Oceania": [
+                "Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru", 
+                "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands", 
+                "Tonga", "Tuvalu", "Vanuatu"
+            ],
+            "South America": [
+                "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", 
+                "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"
+            ]
+        };
+
+        let country = '';
+        let countryInList = [];
+        let chances = 10;
+        let uscInList = [];
+
+        document.getElementById('start').addEventListener('click', () => {
+            const continentSelect = document.getElementById('continent');
+            const continent = continentSelect.value;
+
+            // Select a random country from the selected continent
+            const countries = continentsDict[continent];
+            country = countries[Math.floor(Math.random() * countries.length)].toLowerCase();
+            countryInList = Array.from(country);
+            uscInList = Array(country.length).fill('_');
+
+            // Display the masked country
+            document.getElementById('country-display').textContent = uscInList.join(' ');
+            document.getElementById('game').classList.remove('hidden');
+            document.getElementById('message').textContent = '';
+            document.getElementById('chances').textContent = `Chances left: ${chances}`;
+        });
+
+        document.getElementById('submit-guess').addEventListener('click', () => {
+            const guessInput = document.getElementById('guess');
+            const guess = guessInput.value.toLowerCase();
+
+            if (!guess.match(/[a-z]/) || guess.length !== 1) {
+                document.getElementById('message').textContent = 'Please enter a single letter.';
+                return;
+            }
+
+            if (countryInList.includes(guess)) {
+                // Update uscInList with correct guesses
+                countryInList.forEach((letter, index) => {
+                    if (letter === guess) {
+                        uscInList[index] = guess;
+                    }
+                });
+                document.getElementById('message').textContent = 'Correct!';
+            } else {
+                chances--;
+                document.getElementById('message').textContent = `Incorrect! You have ${chances} chances left.`;
+            }
+
+            // Check if the user has won or lost
+            if (chances === 0) {
+                document.getElementById('message').textContent = `Game over! The country was ${country}.`;
+                document.getElementById('guess').disabled = true;
+            } else if (!uscInList.includes('_')) {
+                document.getElementById('message').textContent = `Congratulations! The country is ${country.charAt(0).toUpperCase() + country.slice(1)}!`;
+                document.getElementById('guess').disabled = true;
+            }
+
+            document.getElementById('country-display').textContent = uscInList.join(' ');
+            document.getElementById('chances').textContent = `Chances left: ${chances}`;
+            guessInput.value = '';
+        });
+    </script>
+</body>
+</html>
